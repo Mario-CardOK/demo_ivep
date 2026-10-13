@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<meta http-equiv="Content-Security-Policy" 
+      content="default-src 'self'; 
+               script-src 'self' 'unsafe-inline'; 
+               style-src 'self' 'unsafe-inline'; 
+               img-src 'self' data: https:; 
+               connect-src 'self'; 
+               frame-ancestors 'none'; 
+               base-uri 'self'; 
+               form-action 'self';">
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Новость — ИВЭП ДВО РАН</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+
+    <!-- ===== ШАПКА (как на других страницах) ===== -->
+    <header class="header">
+        <div class="container header-inner">
+            <a href="../index.html" class="logo-block">
+                <div class="emblem">
+                    <svg viewBox="0 0 60 60" width="60" height="60">
+                        <circle cx="30" cy="30" r="28" fill="none" stroke="#1a4b7a" stroke-width="2"/>
+                        <path d="M15 35 Q30 15 45 35" fill="none" stroke="#1a4b7a" stroke-width="2"/>
+                        <path d="M15 40 Q30 20 45 40" fill="none" stroke="#2d8ac7" stroke-width="2"/>
+                        <circle cx="30" cy="30" r="4" fill="#1a4b7a"/>
+                    </svg>
+                </div>
+                <div class="title-block">
+                    <div class="institute-name">Институт водных и экологических проблем</div>
+                    <div class="institute-sub">Дальневосточного отделения Российской академии наук</div>
+                    <div class="institute-short">ИВЭП ДВО РАН</div>
+                </div>
+            </a>
+        </div>
+    </header>
+
+    <!-- ===== НАВИГАЦИЯ ===== -->
+    <nav class="main-nav">
+        <div class="container">
+            <ul class="nav-list">
+                <li><a href="../index.html#about">Об институте</a></li>
+                <li><a href="../index.html#departments">Научные подразделения</a></li>
+                <li><a href="../index.html#publications">Публикации</a></li>
+                <li><a href="../index.html#projects">Проекты</a></li>
+                <li><a href="../index.html#postgrad">Аспирантура</a></li>
+                <li><a href="../index.html#results">Результаты НИР</a></li>
+                <li><a href="news.html" class="active">Новости</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- ===== ХЛЕБНЫЕ КРОШКИ ===== -->
+    <div class="breadcrumbs">
+        <div class="container">
+            <a href="../index.html">Главная</a>
+            <span class="sep">›</span>
+            <a href="news.html">Новости</a>
+            <span class="sep">›</span>
+            <span class="current" id="news-title-crumb">Просмотр новости</span>
+        </div>
+    </div>
+
+    <!-- ===== КОНТЕНТ ===== -->
+    <main class="main-content">
+        <div class="container">
+            <article id="news-full" class="news-full">
+                <p class="news-loading">Загрузка новости…</p>
+            </article>
+        </div>
+    </main>
+
+    <!-- ===== ФУТЕР ===== -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-line"></div>
+            <p>© 2026 Институт водных и экологических проблем ДВО РАН, г. Хабаровск</p>
+        </div>
+    </footer>
+
+    <script>
+    const params = new URLSearchParams(window.location.search);
+    const slug = params.get('slug');
+
+    if (!slug) {
+        document.getElementById('news-full').innerHTML =
+            '<p class="news-empty">Новость не найдена.</p>';
+    } else {
+        fetch('../_news/news.json?v=' + Date.now())
+            .then(r => r.json())
+            .then(news => {
+                const item = news.find(n => n.slug === slug);
+                if (!item) {
+                    document.getElementById('news-full').innerHTML =
+                        '<p class="news-empty">Новость не найдена.</p>';
+                    return;
+                }
+                document.getElementById('news-title-crumb').textContent = item.title;
+                document.title = item.title + ' — ИВЭП ДВО РАН';
+
+                document.getElementById('news-full').innerHTML = `
+                    <div class="news-date">${formatDate(item.date)}</div>
+                    <h1 class="news-full-title">${item.title}</h1>
+                    <div class="news-full-body">${item.body}</div>
+                    <a href="news.html" class="news-back">← Все новости</a>
+                `;
+            })
+            .catch(() => {
+                document.getElementById('news-full').innerHTML =
+                    '<p class="news-empty">Не удалось загрузить новость.</p>';
+            });
+    }
+
+    function formatDate(str) {
+        const d = new Date(str);
+        if (isNaN(d)) return str;
+        return d.toLocaleDateString('ru-RU', {
+            day: 'numeric', month: 'long', year: 'numeric'
+        });
+    }
+    </script>
+
+</body>
+</html>
